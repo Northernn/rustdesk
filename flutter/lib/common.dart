@@ -55,6 +55,12 @@ var isMobile = isAndroid || isIOS;
 var version = '';
 int androidVersion = 0;
 
+// Only used on Linux.
+// `windowManager.setResizable(false)` will reset the window size to the default size on Linux.
+// https://stackoverflow.com/questions/8193613/gtk-window-resize-disable-without-going-back-to-default
+// So we need to use this flag to enable/disable resizable.
+bool _linuxWindowResizable = true;
+
 /// only available for Windows target
 int windowsBuildNumber = 0;
 DesktopType? desktopType;
@@ -1572,7 +1578,7 @@ Future<void> saveWindowPosition(WindowType type, {int? windowId}) async {
       // `await windowManager.isMaximized()` will always return true
       // if is not resizable. The reason is unknown.
       //
-      // `windowManager.setResizable(!bind.isIncomingOnly());` in main.dart
+      // `setResizable(!bind.isIncomingOnly());` in main.dart
       isMaximized =
           bind.isIncomingOnly() ? false : await windowManager.isMaximized();
       position = await windowManager.getPosition();
@@ -2978,16 +2984,16 @@ Future<bool> setServerConfig(
   }
   // id
   if (config.idServer.isNotEmpty && errMsgs != null) {
-    errMsgs[0].value =
-        translate(await bind.mainTestIfValidServer(server: config.idServer));
+    errMsgs[0].value = translate(await bind.mainTestIfValidServer(
+        server: config.idServer, testWithProxy: true));
     if (errMsgs[0].isNotEmpty) {
       return false;
     }
   }
   // relay
   if (config.relayServer.isNotEmpty && errMsgs != null) {
-    errMsgs[1].value =
-        translate(await bind.mainTestIfValidServer(server: config.relayServer));
+    errMsgs[1].value = translate(await bind.mainTestIfValidServer(
+        server: config.relayServer, testWithProxy: true));
     if (errMsgs[1].isNotEmpty) {
       return false;
     }
@@ -3106,6 +3112,27 @@ Color? disabledTextColor(BuildContext context, bool enabled) {
       : Theme.of(context).textTheme.titleLarge?.color?.withOpacity(0.6);
 }
 
+Widget loadPowered(BuildContext context) {
+  return MouseRegion(
+    cursor: SystemMouseCursors.click,
+    child: GestureDetector(
+      onTap: () {
+        launchUrl(Uri.parse('https://rustdesk.com'));
+      },
+      child: Opacity(
+          opacity: 0.5,
+          child: Text(
+            translate("powered_by_me"),
+            overflow: TextOverflow.clip,
+            style: Theme.of(context)
+                .textTheme
+                .bodySmall
+                ?.copyWith(fontSize: 9, decoration: TextDecoration.underline),
+          )),
+    ),
+  ).marginOnly(top: 6);
+}
+
 // max 300 x 60
 Widget loadLogo() {
   return FutureBuilder<ByteData>(
@@ -3154,4 +3181,103 @@ Size getIncomingOnlySettingsSize() {
 bool isInHomePage() {
   final controller = Get.find<DesktopTabController>();
   return controller.state.value.selected == 0;
+}
+
+Widget buildPresetPasswordWarning() {
+  return FutureBuilder<bool>(
+    future: bind.isPresetPassword(),
+    builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return CircularProgressIndicator(); // Show a loading spinner while waiting for the Future to complete
+      } else if (snapshot.hasError) {
+        return Text(
+            'Error: ${snapshot.error}'); // Show an error message if the Future completed with an error
+      } else if (snapshot.hasData && snapshot.data == true) {
+        return Container(
+          color: Colors.yellow,
+          child: Column(
+            children: [
+              Align(
+                  child: Text(
+                translate("Security Alert"),
+                style: TextStyle(
+                  color: Colors.red,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              )).paddingOnly(bottom: 8),
+              Text(
+                translate("preset_password_warning"),
+                style: TextStyle(color: Colors.red),
+              )
+            ],
+          ).paddingAll(8),
+        ); // Show a warning message if the Future completed with true
+      } else {
+        return SizedBox
+            .shrink(); // Show nothing if the Future completed with false or null
+      }
+    },
+  );
+}
+
+// https://github.com/leanflutter/window_manager/blob/87dd7a50b4cb47a375b9fc697f05e56eea0a2ab3/lib/src/widgets/virtual_window_frame.dart#L44
+Widget buildVirtualWindowFrame(BuildContext context, Widget child) {
+  boxShadow() => isMainDesktopWindow
+      ? <BoxShadow>[
+          if (stateGlobal.fullscreen.isFalse || stateGlobal.isMaximized.isFalse)
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              offset: Offset(
+                  0.0,
+                  stateGlobal.isFocused.isTrue
+                      ? kFrameBoxShadowOffsetFocused
+                      : kFrameBoxShadowOffsetUnfocused),
+              blurRadius: kFrameBoxShadowBlurRadius,
+            ),
+        ]
+      : null;
+  return Obx(
+    () => Container(
+      decoration: BoxDecoration(
+        color: isMainDesktopWindow
+            ? Colors.transparent
+            : Theme.of(context).colorScheme.background,
+        border: Border.all(
+          color: Theme.of(context).dividerColor,
+          width: stateGlobal.windowBorderWidth.value,
+        ),
+        borderRadius: BorderRadius.circular(
+          (stateGlobal.fullscreen.isTrue || stateGlobal.isMaximized.isTrue)
+              ? 0
+              : kFrameBorderRadius,
+        ),
+        boxShadow: boxShadow(),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(
+          (stateGlobal.fullscreen.isTrue || stateGlobal.isMaximized.isTrue)
+              ? 0
+              : kFrameClipRRectBorderRadius,
+        ),
+        child: child,
+      ),
+    ),
+  );
+}
+
+get windowEdgeSize => isLinux && !_linuxWindowResizable ? 0.0 : kWindowEdgeSize;
+
+// `windowManager.setResizable(false)` will reset the window size to the default size on Linux and then set unresizable.
+// See _linuxWindowResizable for more details.
+// So we use `setResizable()` instead of `windowManager.setResizable()`.
+//
+// We can only call `windowManager.setResizable(false)` if we need the default size on Linux.
+setResizable(bool resizable) {
+  if (isLinux) {
+    _linuxWindowResizable = resizable;
+    stateGlobal.refreshResizeEdgeSize();
+  } else {
+    windowManager.setResizable(resizable);
+  }
 }
