@@ -1096,21 +1096,33 @@ void msgBox(SessionID sessionId, String type, String title, String text,
           dialogManager.dismissAll();
         }));
   }
-  if (reconnect != null &&
-      title == "Connection Error" &&
-      reconnectTimeout != null) {
+  if (reconnect != null && title == "Connection Error") {
     // `enabled` is used to disable the dialog button once the button is clicked.
     final enabled = true.obs;
-    final button = Obx(() => _ReconnectCountDownButton(
-          second: reconnectTimeout,
-          onPressed: enabled.isTrue
-              ? () {
-                  // Disable the button
-                  enabled.value = false;
-                  reconnect(dialogManager, sessionId, false);
-                }
-              : null,
-        ));
+    final button = reconnectTimeout != null
+        ? Obx(() => _ReconnectCountDownButton(
+              second: reconnectTimeout,
+              onPressed: enabled.isTrue
+                  ? () {
+                      // Disable the button
+                      enabled.value = false;
+                      reconnect(dialogManager, sessionId, false);
+                    }
+                  : null,
+            ))
+        : Obx(
+            () => dialogButton(
+              'Reconnect',
+              isOutline: true,
+              onPressed: enabled.isTrue
+                  ? () {
+                      // Disable the button
+                      enabled.value = false;
+                      reconnect(dialogManager, sessionId, false);
+                    }
+                  : null,
+            ),
+          );
     buttons.insert(0, button);
   }
   if (link.isNotEmpty) {
@@ -1428,7 +1440,7 @@ Future<void> initGlobalFFI() async {
   _globalFFI = FFI(null);
   debugPrint("_globalFFI init end");
   // after `put`, can also be globally found by Get.find<FFI>();
-  Get.put(_globalFFI, permanent: true);
+  Get.put<FFI>(_globalFFI, permanent: true);
 }
 
 String translate(String name) {
@@ -2715,20 +2727,26 @@ Future<void> shouldBeBlocked(RxBool block, WhetherUseRemoteBlock? use) async {
 }
 
 typedef WhetherUseRemoteBlock = Future<bool> Function();
-Widget buildRemoteBlock({required Widget child, WhetherUseRemoteBlock? use}) {
-  var block = false.obs;
+Widget buildRemoteBlock(
+    {required Widget child,
+    required RxBool block,
+    required bool mask,
+    WhetherUseRemoteBlock? use}) {
   return Obx(() => MouseRegion(
         onEnter: (_) async {
           await shouldBeBlocked(block, use);
         },
         onExit: (event) => block.value = false,
         child: Stack(children: [
-          child,
-          Offstage(
-              offstage: !block.value,
-              child: Container(
-                color: Colors.black.withOpacity(0.5),
-              )),
+          // scope block tab
+          FocusScope(child: child, canRequestFocus: !block.value),
+          // mask block click, cm not block click and still use check_click_time to avoid block local click
+          if (mask)
+            Offstage(
+                offstage: !block.value,
+                child: Container(
+                  color: Colors.black.withOpacity(0.5),
+                )),
         ]),
       ));
 }
@@ -3301,6 +3319,10 @@ Widget buildPresetPasswordWarning() {
         return Text(
             'Error: ${snapshot.error}'); // Show an error message if the Future completed with an error
       } else if (snapshot.hasData && snapshot.data == true) {
+        if (bind.mainGetLocalOption(key: "remove-preset-password-warning") !=
+            'N') {
+          return SizedBox.shrink();
+        }
         return Container(
           color: Colors.yellow,
           child: Column(
