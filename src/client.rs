@@ -1524,8 +1524,8 @@ impl LoginConfigHandler {
             let server = server_key.next().unwrap_or_default();
             let args = server_key.next().unwrap_or_default();
             let key = if server == PUBLIC_SERVER {
-                PUBLIC_RS_PUB_KEY.to_owned()
-                //config::RS_PUB_KEY.to_owned()
+                //PUBLIC_RS_PUB_KEY.to_owned()
+                config::RS_PUB_KEY.to_owned()
             } else {
                 let mut args_map: HashMap<String, &str> = HashMap::new();
                 for arg in args.split('&') {
