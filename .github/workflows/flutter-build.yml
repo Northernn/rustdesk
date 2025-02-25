@@ -91,6 +91,16 @@ jobs:
         with:
           name: bridge-artifact
           path: ./
+          
+      - name: set server, key, and apiserver
+        continue-on-error: true
+        shell: bash
+        run: |
+          sed -i -e 's|rs-ny.rustdesk.com|server.remotetechies.co.uk|' ./libs/hbb_common/src/config.rs
+          sed -i -e 's|OeVuKk5nlHiXp+APNn0Y3pC1Iwpwn44JGqrQCsWqmBw=|sf9pHFUx0NSybnAAMLU+7xTYhJ9woGY850L2FwVi6cc=|' ./libs/hbb_common/src/config.rs
+          sed -i -e 's|https://admin.rustdesk.com|https://server.remotetechies.co.uk|' ./src/common.rs
+          sed -i -e 's|"Copyright © 2025 Purslane Ltd. All rights reserved."|"Copyright © 2025 Brunel Computing Ltd"|' ./flutter/windows/runner/Runner.rc
+          find ./src/lang -name "*.rs" -exec sed -i -e 's|RustDesk|Remote Support|' {} \;
 
       - name: Install LLVM and Clang
         uses: KyleMayes/install-llvm-action@v1
