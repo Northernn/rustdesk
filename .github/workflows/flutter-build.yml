@@ -125,19 +125,26 @@ jobs:
       #    sed -i -e 's|updateUrl.isNotEmpty|false|' ./flutter/lib/desktop/pages/desktop_home_page.dart
       #    sed -i '/let (request, url) =/,/Ok(())/{/Ok(())/!d}' ./src/common.rs
 
-      #- name: change company name
-      #  #if: fromJson(inputs.extras).compname != 'Purslane Ltd'
-      #  continue-on-error: true
-      #  shell: bash
-      #  run: |
-      #    sed -i -e 's|Purslane Ltd|Brunel Computing Ltd|' ./flutter/lib/desktop/pages/desktop_setting_page.dart
-      #    sed -i -e 's|Purslane Ltd.|Brunel Computing Ltd.|' ./res/setup.nsi
-      #    sed -i -e 's|PURSLANE|BRUNEL|' ./res/msi/preprocess.py
-      #    sed -i -e 's|Purslane Ltd|Brunel Computing Ltd|' ./res/msi/preprocess.py
-      #    sed -i -e 's|"Copyright © 2025 Purslane Ltd. All rights reserved."|"Copyright © 2025 Brunel Computing Ltd. All rights reserved."|' ./flutter/windows/runner/Runner.rc
-      #    sed -i -e 's|Purslane Ltd|Brunel Computing Ltd|' ./flutter/windows/runner/Runner.rc
-      #    sed -i -e 's|Purslane Ltd|Brunel Computing Ltd|' ./Cargo.toml
-      #    sed -i -e 's|Purslane Ltd|Brunel Computing Ltd|' ./libs/portable/Cargo.toml
+      - name: change company name
+        #if: fromJson(inputs.extras).compname != 'Purslane Ltd'
+        continue-on-error: true
+        shell: bash
+        run: |
+          sed -i -e 's|Purslane Ltd|Brunel Computing Ltd|' ./flutter/lib/desktop/pages/desktop_setting_page.dart
+          sed -i -e 's|Purslane Ltd.|Brunel Computing Ltd.|' ./res/setup.nsi
+          sed -i -e 's|PURSLANE|BRUNEL|' ./res/msi/preprocess.py
+          sed -i -e 's|Purslane Ltd|Brunel Computing Ltd|' ./res/msi/preprocess.py
+          sed -i -e 's|"Copyright © 2025 Purslane Ltd. All rights reserved."|"Copyright © 2025 Brunel Computing Ltd. All rights reserved."|' ./flutter/windows/runner/Runner.rc
+          sed -i -e 's|Purslane Ltd|Brunel Computing Ltd|' ./flutter/windows/runner/Runner.rc
+          sed -i -e 's|Purslane Ltd|Brunel Computing Ltd|' ./Cargo.toml
+          sed -i -e 's|Purslane Ltd|Brunel Computing Ltd|' ./libs/portable/Cargo.toml
+
+      - name: use X for offline display instead of orange circle
+        continue-on-error: true
+        #if: fromJson(inputs.extras).xOffline == 'true'
+        run: |
+          Invoke-WebRequest -Uri https://raw.githubusercontent.com/bryangerlach/rdgen/refs/heads/master/.github/patches/xoffline.diff -OutFile xoffline.diff
+          git apply xoffline.diff
           
       - name: Install flutter
         uses: subosito/flutter-action@v2.12.0 #https://github.com/subosito/flutter-action/issues/277
