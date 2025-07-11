@@ -334,26 +334,27 @@ impl Client {
         } else {
             NatType::from_i32(my_nat_type).unwrap_or(NatType::UNKNOWN_NAT)
         };
-
-        if !key.is_empty() && !token.is_empty() {
-            // mainly for the security of token
-            secure_tcp(&mut socket, key)
-                .await
-                .map_err(|e| anyhow!("Failed to secure tcp: {}", e))?;
-        } else if let Some(udp) = udp.1.as_ref() {
-            let tm = Instant::now();
-            loop {
-                let port = *udp.lock().unwrap();
-                if port > 0 {
-                    break;
-                }
-                // await for 0.5 RTT
-                if tm.elapsed() > rtt / 2 {
-                    break;
-                }
-                hbb_common::sleep(0.001).await;
-            }
-        }
+	    
+       // if !key.is_empty() && !token.is_empty() {
+       //     // mainly for the security of token
+       //     secure_tcp(&mut socket, key)
+       //         .await
+       //         .map_err(|e| anyhow!("Failed to secure tcp: {}", e))?;
+       // } else if let Some(udp) = udp.1.as_ref() {
+       //     let tm = Instant::now();
+       //     loop {
+       //         let port = *udp.lock().unwrap();
+       //         if port > 0 {
+       //             break;
+       //         }
+       //         // await for 0.5 RTT
+       //         if tm.elapsed() > rtt / 2 {
+       //             break;
+       //         }
+       //         hbb_common::sleep(0.001).await;
+       //     }
+       // }
+	    
         // Stop UDP NAT test task if still running
         let _ = stop_udp_tx.send(());
         let mut msg_out = RendezvousMessage::new();
