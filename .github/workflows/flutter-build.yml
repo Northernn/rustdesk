@@ -117,13 +117,13 @@ jobs:
       #  run: |
       #    sed -i -e '/if !key.is_empty() && !token.is_empty() {/,/^\s*}/d' ./src/client.rs          
 
-      #- name: removeNewVersionNotif
-      #  continue-on-error: true
-      #  #if: fromJson(inputs.extras).removeNewVersionNotif == 'true'
-      #  shell: bash
-      #  run: | 
-      #    sed -i -e 's|updateUrl.isNotEmpty|false|' ./flutter/lib/desktop/pages/desktop_home_page.dart
-      #    sed -i '/let (request, url) =/,/Ok(())/{/Ok(())/!d}' ./src/common.rs
+      - name: removeNewVersionNotif
+        continue-on-error: true
+        #if: fromJson(inputs.extras).removeNewVersionNotif == 'true'
+        shell: bash
+        run: | 
+          sed -i -e 's|updateUrl.isNotEmpty|false|' ./flutter/lib/desktop/pages/desktop_home_page.dart
+          sed -i '/let (request, url) =/,/Ok(())/{/Ok(())/!d}' ./src/common.rs
 
       - name: change company name
         #if: fromJson(inputs.extras).compname != 'Purslane Ltd'
