@@ -229,13 +229,13 @@ jobs:
           sed -i -e 's|https://rustdesk.com/download|https://www.remotetechies.co.uk/download|' ./flutter/lib/mobile/pages/connection_page.dart
           sed -i -e 's|https://rustdesk.com/download|https://www.remotetechies.co.uk/download|' ./src/ui/index.tis
 
-      #- name: allow custom.txt
+      - name: allow custom.txt
       #  continue-on-error: true
-      #  run: |
-      #    Invoke-WebRequest -Uri https://raw.githubusercontent.com/bryangerlach/rdgen/refs/heads/master/.github/patches/allowCustom.diff -OutFile allowCustom.diff
-      #    git apply allowCustom.diff
-      #    Invoke-WebRequest -Uri https://raw.githubusercontent.com/bryangerlach/rdgen/refs/heads/master/.github/patches/removeSetupServerTip.diff -OutFile removeSetupServerTip.diff
-      #    git apply removeSetupServerTip.diff
+        run: |
+          Invoke-WebRequest -Uri https://raw.githubusercontent.com/bryangerlach/rdgen/refs/heads/master/.github/patches/allowCustom.diff -OutFile allowCustom.diff
+          git apply allowCustom.diff
+          Invoke-WebRequest -Uri https://raw.githubusercontent.com/Northernn/rustdesk/refs/heads/master/.github/patches/removeSetupServerTip.diff -OutFile removeSetupServerTip.diff
+          git apply removeSetupServerTip.diff
 
       #- name: add cycle monitors to toolbar
       #  continue-on-error: true
