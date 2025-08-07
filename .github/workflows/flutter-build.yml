@@ -109,14 +109,7 @@ jobs:
           sed -i -e 's|rs-ny.rustdesk.com|server.remotetechies.co.uk|' ./libs/hbb_common/src/config.rs
           sed -i -e 's|OeVuKk5nlHiXp+APNn0Y3pC1Iwpwn44JGqrQCsWqmBw=|sf9pHFUx0NSybnAAMLU+7xTYhJ9woGY850L2FwVi6cc=|' ./libs/hbb_common/src/config.rs
           sed -i -e 's|https://admin.rustdesk.com|https://server.remotetechies.co.uk|' ./src/common.rs
-
-      #- name: fix connection delay
-      #  continue-on-error: true
-      #  #if: ${{ fromJson(inputs.extras).delayFix == 'true' }}
-      #  shell: bash
-      #  run: |
-      #    sed -i -e '/if !key.is_empty() && !token.is_empty() {/,/^\s*}/d' ./src/client.rs          
-      
+          
       - name: fix connection delay
         continue-on-error: false
         #if: ${{ fromJson(inputs.extras).delayFix == 'true' }}
@@ -159,7 +152,7 @@ jobs:
           sed -i -e "s|launchUrlString('https://rustdesk.com/privacy.html')|launchUrlString('https://www.remotetechies.co.uk/privacy.html')|" ./flutter/lib/mobile/pages/settings_page.dart
           sed -i -e "s|https://rustdesk.com/privacy.html|https://www.remotetechies.co.uk/privacy.html|" ./flutter/lib/desktop/pages/install_page.dart
           sed -i -e "s|https://rustdesk.com/|https://www.remotetechies.co.uk/|" ./res/setup.nsi
-          
+
       - name: use X for offline display instead of orange circle
         continue-on-error: true
         #if: fromJson(inputs.extras).xOffline == 'true'
@@ -251,22 +244,22 @@ jobs:
           Invoke-WebRequest -Uri https://raw.githubusercontent.com/Northernn/rustdesk/refs/heads/master/.github/patches/cycle_monitor.diff -OutFile cycle_monitor.diff
           git apply cycle_monitor.diff
 
-      #- name: hide-cm
-      #  continue-on-error: true
-      #  #if: fromJson(inputs.extras).hidecm == 'true'
-      #  run: |
-      #    Invoke-WebRequest -Uri https://raw.githubusercontent.com/bryangerlach/rdgen/refs/heads/master/.github/patches/hidecm.diff -OutFile hidecm.diff
-      #    git apply hidecm.diff
+      - name: hide-cm
+        continue-on-error: true
+        #if: fromJson(inputs.extras).hidecm == 'true'
+        run: |
+          Invoke-WebRequest -Uri https://raw.githubusercontent.com/Northernn/rustdesk/refs/heads/master/.github/patches/hidecm.diff -OutFile hidecm.diff
+          git apply hidecm.diff
           
-      #- name: run as admin
-      #  continue-on-error: true
-      #  #if: ${{ fromJson(inputs.extras).runasadmin == 'true' }}
-      #  shell: bash
-      #  run: |
-      #    sed -i '/<\/compatibility>/a \
-      #          <security> \
-      #            <requestedExecutionLevel level="requireAdministrator" uiAccess="false"/> \
-      #          </security>' ./flutter/windows/runner/runner.exe.manifest
+      - name: run as admin
+        continue-on-error: true
+        #if: ${{ fromJson(inputs.extras).runasadmin == 'true' }}
+        shell: bash
+        run: |
+          sed -i '/<\/compatibility>/a \
+                <security> \
+                  <requestedExecutionLevel level="requireAdministrator" uiAccess="false"/> \
+                </security>' ./flutter/windows/runner/runner.exe.manifest
 
       - name: Build rustdesk
         run: |
