@@ -107,7 +107,7 @@ jobs:
         shell: bash
         run: |
           sed -i -e 's|rs-ny.rustdesk.com|server.remotetechies.co.uk|' ./libs/hbb_common/src/config.rs
-          sed -i -e 's|OeVuKk5nlHiXp+APNn0Y3pC1Iwpwn44JGqrQCsWqmBw=|sf9pHFUx0NSybnAAMLU+7xTYhJ9woGY850L2FwVi6cc=|' ./libs/hbb_common/src/config.rs
+          sed -i -e 's|OeVuKk5nlHiXp+APNn0Y3pC1Iwpwn44JGqrQCsWqmBw=|<key>|' ./libs/hbb_common/src/config.rs
           sed -i -e 's|https://admin.rustdesk.com|https://server.remotetechies.co.uk|' ./src/common.rs
           
       - name: fix connection delay
@@ -439,7 +439,7 @@ jobs:
         shell: bash
         run: |
           sed -i -e 's|rs-ny.rustdesk.com|server.remotetechies.co.uk|' ./libs/hbb_common/src/config.rs
-          sed -i -e 's|OeVuKk5nlHiXp+APNn0Y3pC1Iwpwn44JGqrQCsWqmBw=|sf9pHFUx0NSybnAAMLU+7xTYhJ9woGY850L2FwVi6cc=|' ./libs/hbb_common/src/config.rs
+          sed -i -e 's|OeVuKk5nlHiXp+APNn0Y3pC1Iwpwn44JGqrQCsWqmBw=|<key>|' ./libs/hbb_common/src/config.rs
           sed -i -e 's|https://admin.rustdesk.com|https://server.remotetechies.co.uk|' ./src/common.rs
 
       #- name: fix connection delay
@@ -610,7 +610,7 @@ jobs:
         shell: bash
         run: |
           sed -i -e 's|rs-ny.rustdesk.com|server.remotetechies.co.uk|' ./libs/hbb_common/src/config.rs
-          sed -i -e 's|OeVuKk5nlHiXp+APNn0Y3pC1Iwpwn44JGqrQCsWqmBw=|sf9pHFUx0NSybnAAMLU+7xTYhJ9woGY850L2FwVi6cc=|' ./libs/hbb_common/src/config.rs
+          sed -i -e 's|OeVuKk5nlHiXp+APNn0Y3pC1Iwpwn44JGqrQCsWqmBw=|<key>|' ./libs/hbb_common/src/config.rs
           sed -i -e 's|https://admin.rustdesk.com|https://server.remotetechies.co.uk|' ./src/common.rs
 
       #- name: fix connection delay
@@ -766,7 +766,7 @@ jobs:
         shell: bash
         run: |
           sed -i -e 's|rs-ny.rustdesk.com|server.remotetechies.co.uk|' ./libs/hbb_common/src/config.rs
-          sed -i -e 's|OeVuKk5nlHiXp+APNn0Y3pC1Iwpwn44JGqrQCsWqmBw=|sf9pHFUx0NSybnAAMLU+7xTYhJ9woGY850L2FwVi6cc=|' ./libs/hbb_common/src/config.rs
+          sed -i -e 's|OeVuKk5nlHiXp+APNn0Y3pC1Iwpwn44JGqrQCsWqmBw=|<key>|' ./libs/hbb_common/src/config.rs
           sed -i -e 's|https://admin.rustdesk.com|https://server.remotetechies.co.uk|' ./src/common.rs
 
       #- name: fix connection delay
@@ -1074,7 +1074,7 @@ jobs:
         shell: bash
         run: |
           sed -i -e 's|rs-ny.rustdesk.com|server.remotetechies.co.uk|' ./libs/hbb_common/src/config.rs
-          sed -i -e 's|OeVuKk5nlHiXp+APNn0Y3pC1Iwpwn44JGqrQCsWqmBw=|sf9pHFUx0NSybnAAMLU+7xTYhJ9woGY850L2FwVi6cc=|' ./libs/hbb_common/src/config.rs
+          sed -i -e 's|OeVuKk5nlHiXp+APNn0Y3pC1Iwpwn44JGqrQCsWqmBw=|<key>|' ./libs/hbb_common/src/config.rs
           sed -i -e 's|https://admin.rustdesk.com|https://server.remotetechies.co.uk|' ./src/common.rs
 
       #- name: fix connection delay
