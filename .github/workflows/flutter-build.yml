@@ -103,6 +103,53 @@ jobs:
         with:
           version: ${{ env.LLVM_VERSION }}
 
+      - name: change company name
+        #if: fromJson(inputs.extras).compname != 'Purslane Ltd'
+        continue-on-error: true
+        shell: bash
+        run: |
+          sed -i -e 's|Purslane Ltd|Brunel Computing Ltd|' ./flutter/lib/desktop/pages/desktop_setting_page.dart
+          sed -i -e 's|Purslane Ltd.|Brunel Computing Ltd|' ./res/setup.nsi
+          sed -i -e 's|PURSLANE|BRUNEL|' ./res/msi/preprocess.py
+          sed -i -e 's|Purslane Ltd|Brunel Computing Ltd|' ./res/msi/preprocess.py
+          sed -i -e 's|"Copyright © 2025 Purslane Ltd. All rights reserved."|"Copyright © 2025 Brunel Computing Ltd. All rights reserved."|' ./flutter/windows/runner/Runner.rc
+          sed -i -e 's|Purslane Ltd|Brunel Computing Ltd|' ./flutter/windows/runner/Runner.rc
+          sed -i -e 's|Purslane Ltd|Brunel Computing Ltd|' ./Cargo.toml
+          sed -i -e 's|Purslane Ltd|Brunel Computing Ltd|' ./libs/portable/Cargo.toml
+
+      - name: change url to custom
+        #if: fromJson(inputs.extras).urlLink != 'https://rustdesk.com'
+        continue-on-error: true
+        shell: bash
+        run: |
+          sed -i -e 's|Homepage: https://rustdesk.com|Homepage: https://www.remotetechies.co.uk|' ./build.py
+          sed -i -e "s|launchUrl(Uri.parse('https://rustdesk.com'));|launchUrl(Uri.parse('https://www.remotetechies.co.uk'));|" ./flutter/lib/common.dart
+          sed -i -e "s|launchUrlString('https://rustdesk.com');|launchUrlString('https://www.remotetechies.co.uk');|" ./flutter/lib/desktop/pages/desktop_setting_page.dart
+          sed -i -e "s|launchUrlString('https://rustdesk.com/privacy.html')|launchUrlString('https://www.remotetechies.co.uk/privacy.html')|" ./flutter/lib/desktop/pages/desktop_setting_page.dart
+          sed -i -e "s|const url = 'https://rustdesk.com/';|const url = 'https://www.remotetechies.co.uk';|" ./flutter/lib/mobile/pages/settings_page.dart
+          sed -i -e "s|launchUrlString('https://rustdesk.com/privacy.html')|launchUrlString('https://www.remotetechies.co.uk/privacy.html')|" ./flutter/lib/mobile/pages/settings_page.dart
+          sed -i -e "s|https://rustdesk.com/privacy.html|https://www.remotetechies.co.uk/privacy.html|" ./flutter/lib/desktop/pages/install_page.dart
+          sed -i -e "s|https://rustdesk.com/|https://www.remotetechies.co.uk|" ./res/setup.nsi
+
+      - name: change download link to custom
+        #if: fromJson(inputs.extras).downloadLink != 'https://rustdesk.com/download'
+        continue-on-error: true
+        shell: bash
+        run: |
+          sed -i -e 's|https://rustdesk.com/download|https://www.remotetechies.co.uk|' ./flutter/lib/desktop/pages/desktop_home_page.dart
+          sed -i -e 's|https://rustdesk.com/download|https://www.remotetechies.co.uk|' ./flutter/lib/mobile/pages/connection_page.dart
+          sed -i -e 's|https://rustdesk.com/download|https://www.remotetechies.co.uk|' ./src/ui/index.tis
+
+      - name: set server, key, and apiserver
+        continue-on-error: true
+        shell: bash
+        run: |
+          sed -i -e 's|rs-ny.rustdesk.com|server.remotetechies.co.uk|' ./libs/hbb_common/src/config.rs
+          sed -i -e 's|OeVuKk5nlHiXp+APNn0Y3pC1Iwpwn44JGqrQCsWqmBw=|sf9pHFUx0NSybnAAMLU+7xTYhJ9woGY850L2FwVi6cc=|' ./libs/hbb_common/src/config.rs
+          sed -i -e 's|https://admin.rustdesk.com|https://server.remotetechies.co.uk|' ./src/common.rs
+          # ./flutter/pubspec.yaml
+          #sed -i '/intl:/a \ \ archive: ^3.6.1' ./flutter/pubspec.yaml
+          
       - name: Install flutter
         uses: subosito/flutter-action@v2.12.0 #https://github.com/subosito/flutter-action/issues/277
         with:
@@ -162,6 +209,42 @@ jobs:
           fi
           head -n 100 "${VCPKG_ROOT}/buildtrees/ffmpeg/build-${{ matrix.job.vcpkg-triplet }}-rel-out.log" || true
         shell: bash
+
+      - name: fix connection delay
+        continue-on-error: true
+        #if: ${{ fromJson(inputs.extras).delayFix == 'true' }}
+        shell: bash
+        run: |
+          sed -i -e '/if !key.is_empty() && !token.is_empty() {/,/^\s*}/d' ./src/client.rs
+
+      - name: add cycle monitors to toolbar
+        continue-on-error: true
+        #if: fromJson(inputs.extras).cycleMonitor == 'true'
+        run: |
+          Invoke-WebRequest -Uri https://raw.githubusercontent.com/bryangerlach/rdgen/refs/heads/master/.github/patches/cycle_monitor.diff -OutFile cycle_monitor.diff
+          git apply cycle_monitor.diff
+
+      - name: use X for offline display instead of orange circle
+        continue-on-error: true
+        # if: fromJson(inputs.extras).xOffline == 'true'
+        run: |
+          Invoke-WebRequest -Uri https://raw.githubusercontent.com/bryangerlach/rdgen/refs/heads/master/.github/patches/xoffline.diff -OutFile xoffline.diff
+          git apply xoffline.diff
+
+      - name: hide-cm
+        continue-on-error: true
+        # if: fromJson(inputs.extras).hidecm == 'true'
+        run: |
+          Invoke-WebRequest -Uri https://raw.githubusercontent.com/bryangerlach/rdgen/refs/heads/master/.github/patches/hidecm.diff -OutFile hidecm.diff
+          git apply hidecm.diff
+
+      - name: removeNewVersionNotif
+        continue-on-error: true
+        # if: fromJson(inputs.extras).removeNewVersionNotif == 'true'
+        shell: bash
+        run: | 
+          sed -i -e 's|updateUrl.isNotEmpty|false|' ./flutter/lib/desktop/pages/desktop_home_page.dart
+          sed -i '/let (request, url) =/,/Ok(())/{/Ok(())/!d}' ./src/common.rs
 
       - name: Build rustdesk
         run: |
